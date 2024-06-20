@@ -1,0 +1,152 @@
+services:
+  php7:
+    build:
+      context: ./php7
+      args:
+        - USER_UID=${USER_UID}
+        - USER_GID=${USER_GID}
+    container_name: php7
+    restart: always
+    environment:
+      XDEBUG_CONFIG: remote_host=${IP_LOCAL}
+    ports:
+      - "25:25"
+    expose:
+      - "9000"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+      - "docker.for.wsl2.host.internal: ${IP_LOCAL}"
+    volumes:
+      - ../:/var/www/
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+      - ./docker-php-memlimit.ini:/usr/local/etc/php/conf.d/docker-php-memlimit.ini
+      - ./docker-php-ext-xdebug.ini:/usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
+      - ./openssl.cnf:/etc/ssl/openssl.cnf
+    networks:
+      - gabo-network
+    tty: true
+
+  php8:
+    build:
+      context: ./php8
+      args:
+        - USER_UID=${USER_UID}
+        - USER_GID=${USER_GID}
+    container_name: php8
+    restart: always
+    expose:
+      - "9001"
+    environment:
+      XDEBUG_CONFIG: "client_host=${IP_LOCAL}"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - ../:/var/www/
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+      - ./docker-php-memlimit.ini:/usr/local/etc/php/conf.d/docker-php-memlimit.ini
+      - ./docker-php8-ext-xdebug.ini:/usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
+      - ./openssl.cnf:/etc/ssl/openssl.cnf
+    networks:
+      - gabo-network
+    tty: true
+  
+#  action-api:
+#    build:
+#      context: ./php74
+#      args:
+#        - USER_UID=${USER_UID}
+#        - USER_GID=${USER_GID}
+#    container_name: action-api
+#    restart: always
+#    volumes:
+#      - ../:/var/www/
+#      - "/etc/timezone:/etc/timezone:ro"
+#      - "/etc/localtime:/etc/localtime:ro"
+#      - ./docker-php-memlimit.ini:/usr/local/etc/php/conf.d/docker-php-memlimit.ini
+#      - ./openssl.cnf:/etc/ssl/openssl.cnf
+#    networks:
+#      - gabo-network
+#    tty: true
+
+  node18:
+    build:
+      context: ./node18
+      args:
+        - USER_UID=${USER_UID}
+        - USER_GID=${USER_GID}
+    container_name: node18
+    restart: always
+    ports:
+      - "8080:8080"
+      - "8081:8081"
+    volumes:
+      - ../:/var/www/
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+      - ./openssl.cnf:/etc/ssl/openssl.cnf
+    networks:
+      - gabo-network
+    tty: true
+
+  node14:
+   build:
+     context: ./node14
+     args:
+       - USER_UID=${USER_UID}
+       - USER_GID=${USER_GID}
+   container_name: node14
+   restart: always
+   ports:
+     - "8082:8082"
+   volumes:
+     - ../:/var/www/
+     - "/etc/timezone:/etc/timezone:ro"
+     - "/etc/localtime:/etc/localtime:ro"
+     - ./openssl.cnf:/etc/ssl/openssl.cnf
+   networks:
+     - gabo-network
+   tty: true
+
+  mysql:
+    image: mysql:5.7
+    command: mysqld --sql_mode=""
+    container_name: mysql
+    restart: always
+    tty: true
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+    volumes:
+      - ${DATA_LIB}/data/mysql:/var/lib/mysql
+      - ./mysql/bancos:/bancos
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    ports:
+      - 3306:3306
+    networks:
+      - gabo-network
+
+  caddy:
+    container_name: caddy-server
+    build: ./caddy
+    volumes:
+      - ../:/var/www
+      - ./caddy/caddy:/etc/caddy
+      - .logs/caddy:/var/log/caddy
+    ports:
+      - "80:80"
+      - "8000:8000"
+      - "8001:8001"
+      - "443:443"
+    networks:
+      - gabo-network
+    restart: always
+    tty: true
+
+networks:
+  gabo-network:
+    driver: bridge
+

@@ -1,0 +1,88 @@
+# EXEMPLO COM REVERSE_PROXY COM NODE
+#https://HOST {
+#    reverse_proxy node:PORTA
+#}
+
+# EXEMPLO COM APLICAÇÃO LARAVEL
+# http://api.inbraep {
+#     root * /var/www/api/public
+#     file_server
+#     php_fastcgi avapro:9000 {
+#         index index.php
+#         dial_timeout 6000s
+#         read_timeout  6000s
+#         write_timeout 6000s
+#     }
+#     encode gzip
+#     tls internal
+# }
+
+
+:8000 {
+    root * /var/www/api/public
+    file_server
+    php_fastcgi php7:9000 {
+        index index.php
+        dial_timeout 6000s
+        read_timeout  6000s
+        write_timeout 6000s
+    }
+    header {
+        Access-Control-Allow-Origin *
+        Access-Control-Allow-Credentials true
+        Access-Control-Allow-Methods *
+        Access-Control-Allow-Headers *
+        defer
+    }
+    encode gzip
+}
+
+:8001 {
+    root * /var/www/jogodobicho/public
+    file_server
+    php_fastcgi php8:9000 {
+        index index.php
+        dial_timeout 6000s
+        read_timeout  6000s
+        write_timeout 6000s
+    }
+    header {
+        Access-Control-Allow-Origin *
+        Access-Control-Allow-Credentials true
+        Access-Control-Allow-Methods *
+        Access-Control-Allow-Headers *
+        defer
+    }
+    encode gzip
+}
+
+# :8002 {
+#     root * /var/www/v48/api/public
+#     file_server
+#     php_fastcgi backend:9000 {
+#         index index.php
+#         dial_timeout 6000s
+#         read_timeout  6000s
+#         write_timeout 6000s
+#     }
+#     header {
+#         Access-Control-Allow-Origin *
+#         Access-Control-Allow-Credentials true
+#         Access-Control-Allow-Methods *
+#         Access-Control-Allow-Headers *
+#         defer
+#     }
+#     encode gzip
+# }
+
+# EXEMPLO REDIRECIONAR HTTP PARA HTTPS
+#http://HOST {
+#    redir https://HOST{uri}
+#}
+
+# EXEMPLO COM APLICAÇÃO REACT
+#https://HOST {
+#    root * /var/www/NOME_DA_PASTA/build
+#    try_files {path} /index.html
+#    file_server
+#}
